@@ -34,7 +34,7 @@ void initSPI(){
   volatile uint32_t *GPIOB_OSPEEDR_Addr = (volatile uint32_t *)(0x40020400+0x08); 
   volatile uint32_t *GPIOC_OSPEEDR_Addr = (volatile uint32_t *)(0x40020800+0x08);
 
-    //setoutput speed to high for SCK, MOSI, and MISO pins
+  //setoutput speed to high for SCK, MOSI, and MISO pins
     *GPIOB_OSPEEDR_Addr = *GPIOB_OSPEEDR_Addr & ~(0x3 << 20);//clear bit field
     *GPIOB_OSPEEDR_Addr = *GPIOB_OSPEEDR_Addr | (0x3 << 20);//write value (11) for pin PB10
 
@@ -51,7 +51,7 @@ void initSPI(){
   //Address for SPI2 SPI_CR1(Control) register 
   volatile uint32_t *SPI2_SPI_CR1_Addr = (volatile uint32_t *)(0x40003800);
 
-    //SPI2 Hardware config
+  //SPI2 Hardware config
     *SPI2_SPI_CR1_Addr = *SPI2_SPI_CR1_Addr & ~(1 << 0);//write value (0) to bit field for CPHA
     *SPI2_SPI_CR1_Addr = *SPI2_SPI_CR1_Addr & ~(1 << 1);//write value (0) to bit field for CPOL
 
