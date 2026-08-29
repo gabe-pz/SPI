@@ -1,5 +1,6 @@
 #include "spiFunctions.h"
 
+//configured for SPI2 hardware with the stm32f446
 void initSPI(){  
   gpioXPinMode('A', 8, 01);//PA8 to general output and enable GPIOA RCC
   gpioXPinMode('A', 6, 01);//PA6 to general output and enable GPIOA RCC

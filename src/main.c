@@ -1,11 +1,15 @@
 #include "spiFunctions.h"
 #include "gpioFunctions.h"
 #include "generalHelpers.h"
+#include "uartFunctions.h"
+
+
 
 
 int main(void){
     initSPI();  
-
+    initUART();
+    
     delay(200);
 
     //Address for the SPI2 hardware status register
@@ -14,6 +18,8 @@ int main(void){
     //Address for the SPI2 hardware data register
     volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
     
+    volatile uint8_t *USART2_DR_Addr = (volatile uint8_t *)(0x40004400+0x04);
+    volatile uint32_t *USART2_SR_Addr = (volatile uint32_t *)(0x40004400+0x00);
 
     while(1){
         digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
@@ -35,7 +41,14 @@ int main(void){
              digitalGpioXWrite('A', 6, 0);
         }
 
+
+        while(!(*USART2_SR_Addr & (1 << 7))); 
+        *USART2_DR_Addr = 0x53;
+
+        delay(1000);
+
+
     }
 
-    return 0;
+    return 0; 
 }
