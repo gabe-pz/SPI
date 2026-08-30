@@ -70,17 +70,33 @@ void initSPI(){
 }
 
 
-uint8_t SPI_Exchange(uint8_t val){
-    //Address for the SPI2 hardware status register
-    volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
-    //Address for the SPI2 hardware data register
-    volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
+uint8_t SPI_ReadVal(uint8_t val){
+  uint8_t valR;
 
-    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
-    
-    *SPI2_SPI_DR_Addr = val; //write value to the data register
-    
-    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+  //Address for the SPI2 hardware status register
+  volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
+  //Address for the SPI2 hardware data register
+  volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
+      
+  digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
 
-    return *SPI2_SPI_DR_Addr;//return value in the data register(DR)
+  while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+  
+  *SPI2_SPI_DR_Addr = val; //write value to the data register
+  
+  while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+  valR = *SPI2_SPI_DR_Addr;//read value at the data register(DR) 
+
+  while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+
+  *SPI2_SPI_DR_Addr = 0xFF; //write dummy value to DR such that can trigger exchange
+
+  while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+  valR = *SPI2_SPI_DR_Addr;
+  
+  digitalGpioXWrite('A', 8, 1);//drive CS to high 
+
+  return valR;//return value in the data register(DR)
 }

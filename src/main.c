@@ -9,20 +9,12 @@ int main(void){
     initSPI();  
     initUART();
     
-    //small delay
     delay(200);
 
     //main loop
     while(1){
-        digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
-
-
         //*****SPI EXCHANGES*****
-        uint8_t val = SPI_Exchange(0xD0);//dummy value from the write to request CHIP_ID
-        
-        val = SPI_Exchange(0xFF);//CHIP_ID value from the dummy write to be able to get the value
-
-        digitalGpioXWrite('A', 8, 1);//drive CS to high 
+        uint8_t val = SPI_ReadVal(0xD0);//value for chip_id
         
         //indicator that determines if recieved the correct value for CHIP_ID
         if (val == 88){
