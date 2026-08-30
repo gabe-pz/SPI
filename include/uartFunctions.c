@@ -74,7 +74,7 @@ void uart_sendMsg(char *msg){
 void uart_printInt(int val){
     //determine size
     int size = 1;
-    for(int i = 1; 1 < val/(10*i); i*=10) size++; 
+    for(int i = 1; 1 <= val/(10*i); i*=10) size++; 
     int digits[size]; 
     
     //extract digits
