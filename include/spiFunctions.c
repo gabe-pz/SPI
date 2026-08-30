@@ -70,13 +70,17 @@ void initSPI(){
 }
 
 
-uint8_t SPI_Exchange(volatile uint32_t *SPI_SPI_SR_Addr, volatile uint8_t *SPI_SPI_DR_Addr, uint8_t val){
-    
-    while(!(*SPI_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
-    
-    *SPI_SPI_DR_Addr = val; //write value to the data register
-    
-    while(!(*SPI_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+uint8_t SPI_Exchange(uint8_t val){
+    //Address for the SPI2 hardware status register
+    volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
+    //Address for the SPI2 hardware data register
+    volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
 
-    return *SPI_SPI_DR_Addr;//return value in the data register(DR)
+    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+    
+    *SPI2_SPI_DR_Addr = val; //write value to the data register
+    
+    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+    return *SPI2_SPI_DR_Addr;//return value in the data register(DR)
 }

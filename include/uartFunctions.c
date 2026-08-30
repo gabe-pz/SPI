@@ -54,3 +54,44 @@ void initUART(){
     *USART2_CR1_Addr = *USART2_CR1_Addr | (1 << 13);//enable USART2
 
 }
+
+void uart_sendMsg(char *msg){
+    char *p = msg;
+    volatile uint8_t *USART2_DR_Addr = (volatile uint8_t *)(0x40004400+0x04);
+    volatile uint32_t *USART2_SR_Addr = (volatile uint32_t *)(0x40004400+0x00); 
+
+
+    while(*p != '\0'){
+        
+        while(!(*USART2_SR_Addr & (1 << 7))); 
+        *USART2_DR_Addr = (uint8_t)*p; 
+
+        p++;
+        
+    }
+}
+
+void uart_printInt(int val){
+    //determine size
+    int size = 1;
+    for(int i = 1; 1 < val/(10*i); i*=10) size++; 
+    int digits[size]; 
+    
+    //extract digits
+    int i = 0; 
+    while(val != 0){
+        digits[i] = val%10;
+        val = val/10; 
+        i++;
+    }
+
+    //create the string
+    char charDigits[size];
+    for(int j = 0; j < size; j++){
+        charDigits[j] = '0' + digits[(size-1)-j];
+    }
+    charDigits[size] = '\0';
+
+    //print it
+    uart_sendMsg(charDigits);
+}
