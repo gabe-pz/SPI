@@ -55,19 +55,17 @@ void initUART(){
 
 }
 
-void uart_sendMsg(char *msg){
+void uart_printMsg(char *msg){
     char *p = msg;
     volatile uint8_t *USART2_DR_Addr = (volatile uint8_t *)(0x40004400+0x04);
     volatile uint32_t *USART2_SR_Addr = (volatile uint32_t *)(0x40004400+0x00); 
 
-
-    while(*p != '\0'){
-        
+    //print each char
+    while(*p != '\0'){ 
         while(!(*USART2_SR_Addr & (1 << 7))); 
         *USART2_DR_Addr = (uint8_t)*p; 
 
         p++;
-        
     }
 }
 
@@ -93,5 +91,5 @@ void uart_printInt(int val){
     charDigits[size] = '\0';
 
     //print it
-    uart_sendMsg(charDigits);
+    uart_printMsg(charDigits);
 }

@@ -14,7 +14,7 @@ int main(void){
     //main loop
     while(1){
         //*****SPI EXCHANGES*****
-        uint8_t val = SPI_ReadVal(0xD0);//value for chip_id
+        uint8_t val = SPI_ReadVal(0xD0);//value for CHIP_ID
         
         //indicator that determines if recieved the correct value for CHIP_ID
         if (val == 88){
@@ -30,7 +30,7 @@ int main(void){
 
         //****PRINTING****
         uart_printInt(val);//display value
-        uart_sendMsg("\r\n");//new line
+        uart_printMsg("\r\n");//new line to display
         
 
 
