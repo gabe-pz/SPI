@@ -29,7 +29,7 @@ int main(void){
         }
 
         else{
-             digitalGpioXWrite('A', 6, 0);
+             digitalGpioXWrite('A', 6, 1);
         }
 
     }
