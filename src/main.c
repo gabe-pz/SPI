@@ -9,7 +9,7 @@ int main(void){
     initSPI();  
     initUART();
     
-    delay(200);
+    delay(250);
 
     //main loop
     while(1){
