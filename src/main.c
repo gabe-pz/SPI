@@ -19,20 +19,18 @@ int main(void){
         //indicator that determines if recieved the correct value for CHIP_ID
         if (val == 88){
             digitalGpioXWrite('A', 6, 1);
-	          delay(1000);
+	          delay(250);
 	          digitalGpioXWrite('A', 6, 0);
-	          delay(1000);
+	          delay(250);
+
+		  //****PRINTING****
+		  uart_printInt(val);//display value
+		  uart_printMsg("\r\n");//new line to display
         }
 
         else{
              digitalGpioXWrite('A', 6, 0);
         }
-
-        //****PRINTING****
-        uart_printInt(val);//display value
-        uart_printMsg("\r\n");//new line to display
-        
-
 
     }
 
