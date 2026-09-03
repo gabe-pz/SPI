@@ -1,6 +1,6 @@
 #include "spiFunctions.h"
 
-//configured for SPI2 hardware with the stm32f446
+
 void initSPI(){  
   gpioXPinMode('A', 8, 01);//PA8 to general output and enable GPIOA RCC
   gpioXPinMode('A', 6, 01);//PA6 to general output and enable GPIOA RCC
@@ -70,33 +70,74 @@ void initSPI(){
 }
 
 
-uint8_t SPI_ReadVal(uint8_t val){
-  uint8_t valR;
+uint8_t SPI_ReadVal(uint8_t valRWA){
+    uint8_t valR;
 
-  //Address for the SPI2 hardware status register
-  volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
-  //Address for the SPI2 hardware data register
-  volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
-      
-  digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
+    //Address for the SPI2 hardware status register
+    volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
+    //Address for the SPI2 hardware data register
+    volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
 
-  while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
-  
-  *SPI2_SPI_DR_Addr = val; //write value to the data register
-  
-  while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+    digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
 
-  valR = *SPI2_SPI_DR_Addr;//read value at the data register(DR) 
+    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
 
-  while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+    *SPI2_SPI_DR_Addr = valRWA; //write value to the data register
 
-  *SPI2_SPI_DR_Addr = 0xFF; //write dummy value to DR such that can trigger exchange
+    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
 
-  while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+    valR = *SPI2_SPI_DR_Addr;//read value at the data register(DR) 
 
-  valR = *SPI2_SPI_DR_Addr;
-  
-  digitalGpioXWrite('A', 8, 1);//drive CS to high 
+    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
 
-  return valR;//return value in the data register(DR)
+    *SPI2_SPI_DR_Addr = 0xFF; //write dummy value to DR such that can trigger exchange
+
+    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+    valR = *SPI2_SPI_DR_Addr;
+
+    digitalGpioXWrite('A', 8, 1);//drive CS to high 
+
+    return valR;//return value in the data register(DR)
 }
+
+//function to write value(valW) to SPI peripherals register
+void SPI_WriteVal(uint8_t valRWA, uint8_t valW){
+    uint8_t valR;//value use to read data register to clear data buffer 
+    
+    valRWA = valRWA & ~(1 << 7);//ensure that R/W bit is a zero for writing 
+
+    //Address for the SPI2 hardware status register
+    volatile uint32_t *SPI2_SPI_SR_Addr = (volatile uint32_t *)(0x40003800+0x08);
+    //Address for the SPI2 hardware data register
+    volatile uint8_t *SPI2_SPI_DR_Addr = (volatile uint8_t *)(0x40003800+0x0C);
+
+    //EXCHANGE
+    digitalGpioXWrite('A', 8, 0);//drive CS pin low such that select slave
+    
+    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+
+    *SPI2_SPI_DR_Addr = valRWA; //write value to the data register of write operation on address of register
+
+    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+    valR = *SPI2_SPI_DR_Addr;//read value at the data register(DR) 
+
+    while(!(*SPI2_SPI_SR_Addr & (1 << 1)));//wait for transmit buffer to be empty. Break out of loop whenever bit for TXE is 1, else keep running in loop
+
+    *SPI2_SPI_DR_Addr = valW;//value to write to the SPI peripheral register 
+
+    while(!(*SPI2_SPI_SR_Addr & (1 << 0)));//wait for Recieve buffer to be non-empty
+
+    valR = *SPI2_SPI_DR_Addr;
+    (void)valR;//both reads are junk values when writing
+
+    digitalGpioXWrite('A', 8, 1);//drive CS to high 
+}
+
+
+
+
+
+
+

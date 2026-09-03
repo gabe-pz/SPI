@@ -55,6 +55,7 @@ void initUART(){
 
 }
 
+//simple print char*(aka string) to serial monitor via uart
 void uart_printMsg(char *msg){
     char *p = msg;
     volatile uint8_t *USART2_DR_Addr = (volatile uint8_t *)(0x40004400+0x04);
@@ -69,10 +70,11 @@ void uart_printMsg(char *msg){
     }
 }
 
+//simple print function to print ints
 void uart_printInt(int val){
     //determine size
     int size = 1;
-    for(int i = 1; 1 <= val/(10*i); i*=10) size++; 
+    for(int i = 1; val/(10*i) >= 1; i*=10) size++; 
     int digits[size]; 
     
     //extract digits
