@@ -17,26 +17,25 @@ int16_t dig_Cn(uint8_t MSB_RWA, uint8_t LSB_RWA){
 }
 
 //t_fine constant used in algos for both temperature and pressure
-int32_t t_fine(uint16_t dig_T1, int16_t dig_T2, int16_t dig_T3){
+int32_t t_fine(uint16_t dig_T1, int16_t dig_T2, int16_t dig_T3){ 
+    SPI_WriteVal(0xF4, 0x21);//put bmp-280 into sampling x1 for temperature, off for pressure, and forced mode 
+    delay(7); 
     //get the ADC for temperature 
-    uint8_t temp_MSB_Val = SPI_ReadVal(0xFA);//read value for MSB register for temp 
+    uint8_t temp_MSB_Val = SPI_ReadVal(0xFA);//read value for MSB register for temp     
     uint8_t temp_LSB_Val = SPI_ReadVal(0xFB);//read value for LSB register for temp 
     uint8_t temp_XLSB_Val = SPI_ReadVal(0xFC);//read value for XLSB register for temp 
-    
     int32_t U = (temp_MSB_Val << 12) | (temp_LSB_Val << 4) | (temp_XLSB_Val >> 4); 
 
-    float var_1 = ((float)U / 16384.0f - (float)dig_T1 / 1024.0f)*(float)dig_T2; 
-    float var_2 = ((float)U / 131072.0f - (float)dig_T1 / 8192.0f)*((float)U / 131072.0f - (float)dig_T1 / 8192.0f)*(float)dig_T3;
-
-    return var_1 + var_2; 
+    int32_t var_1 = ((double)U / 16384.0 - (double)dig_T1 / 1024.0)*(double)dig_T2; 
+    int32_t var_2 = ((double)U / 131072.0 - (double)dig_T1 / 8192.0)*((double)U / 131072.0 - (double)dig_T1 / 8192.0)*(double)dig_T3;
+    return (var_1 + var_2); 
 }
 
 //function to compute temperature 
 int32_t temp(int32_t tFine){
-    SPI_WriteVal(0xF4, 0x21);//put bmp-280 into sampling x1 for temperature, off for pressure, and forced mode 
-
+    
     //algo to compute temperature from bosch
-    return ((tFine / 5120.0) * 100);
+    return (tFine*100) / 5120;
 } 
 
 int32_t pres(uint16_t dig_P1, int16_t dig_P2, int16_t dig_P3, int16_t dig_P4, int16_t dig_P5, int16_t dig_P6, int16_t dig_P7, int16_t dig_P8, int16_t dig_P9, int32_t tFine){
